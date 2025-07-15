@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Detection and Movement Capture | NotesSociety</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        h1 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            margin-top: 20px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #counter {
+            font-size: 1.2rem;
+            margin-top: 20px;
+            color: #007BFF;
+        }
+        .whatsapp-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            background-color: #25D366;
+            color: white;
+            font-size: 30px;
+            border-radius: 50%;
+            text-decoration: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .whatsapp-link:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+        }
+        .message {
+            margin-top: 20px;
+            font-size: 1rem;
+            color: #555;
+        }
+        .status {
+            font-weight: bold;
+        }
+        .ns{
+            text-decoration: none;
+            
+        }
+    </style>
+</head>
+<body>
+        <h2><a href="https://notessociety.netlify.app/" class="ns">NotesSociety</a></h2>
+    <h1>Face Detection and Movement Capture</h1>
+    <p>Images will be saved in the "Saved_Faces" folder on your Desktop.</p>
+    <button id="startButton" onclick="startCapture()">Start Capture</button>
+    <button id="stopButton" onclick="stopCapture()" disabled>Stop Capture</button>
+    <p id="statusMessage" class="message">Capture is not started yet.</p>
+    <p id="counter">Counte Number is 0</p>
+    <a href="https://chat.whatsapp.com/IbFLOvxqw5I9opfiS0PCg4" target="_blank" class="whatsapp-link">
+        <i class="fab fa-whatsapp"></i>
+    <script>
+        let imageCounter = 0;
+        
+                function startCapture() {
+            fetch('/start_capture')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("statusMessage").textContent = data.message;
+                    document.getElementById("startButton").disabled = true;
+                    document.getElementById("stopButton").disabled = false;
+                })
+                .catch(error => console.log('Error:', error));
+        }
+
+        function stopCapture() {
+            fetch('/stop_capture')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("statusMessage").textContent = data.message;
+                    document.getElementById("startButton").disabled = false;
+                    document.getElementById("stopButton").disabled = true;
+                })
+                .catch(error => console.log('Error:', error));
+        }
+
+        function updateCounter(counter) {
+            imageCounter = counter;
+            document.getElementById("counter").textContent = `Images Captured: ${imageCounter}`;
+        }
+
+        const eventSource = new EventSource('/capture_images');
+        eventSource.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            if (data.counter) {
+                updateCounter(data.counter);
+            }
+        };
+    </script>
+</body>
+</html>
